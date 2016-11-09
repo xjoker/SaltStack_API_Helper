@@ -26,8 +26,10 @@ namespace API_Test
 
             //Salt_API_Function.IISOperation(new List<string> { "192.168.72.68" }, IISOperation.StopSite, new List<string> { "333.com" });
 
-            Salt_API_Function.GetAppPoolList("*");
+            //Salt_API_Function.GetAppPoolList("*");
 
+            var cc = Salt_API_Function.SVNOperation(@"D:\Web\Repo120161012155749", SVNOperation.info, new List<string> { "192.168.72.68" },st:SVNType.Order,fun: "xjoker_svn.info");
+            Console.WriteLine();
 
         }
     }

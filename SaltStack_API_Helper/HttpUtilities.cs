@@ -51,11 +51,32 @@ namespace SaltAPI
                     streamWriter.Close();
                 }
             }
-            var httpResponse = (HttpWebResponse)request.GetResponse();
-            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+            try
             {
-                var result = streamReader.ReadToEnd();
-                return result;
+                var httpResponse = (HttpWebResponse)request.GetResponse();
+                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                {
+                    var result = streamReader.ReadToEnd();
+                    return result;
+                }
+            }
+            catch (WebException ex)
+            {
+                var httpResponse = (HttpWebResponse)ex.Response;
+                switch (httpResponse.StatusCode)
+                {
+                    case HttpStatusCode.NotFound: // 404
+                        return "404";
+
+                    case HttpStatusCode.InternalServerError: // 500
+                        return "500";
+
+                    case HttpStatusCode.Unauthorized: // 401
+                        return "401";
+
+                    default:
+                        return "000";
+                }
             }
         }
 

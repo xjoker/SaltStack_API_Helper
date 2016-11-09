@@ -456,11 +456,11 @@ namespace SaltAPI
                             string p = Path.GetDirectoryName(bbb[2].Replace("\"", ""));
                             if (svnVersion != null)
                             {
-                                temp.Add(item, SVNOperation(p, SaltAPI.SVNOperation.update, svnUsername, svnPassword, minionName, svnVersion));
+                                temp.Add(item, SVNOperation(p, SaltAPI.SVNOperation.update,  minionName, svnUsername, svnPassword, svnVersion.ToString()));
                             }
                             else
                             {
-                                temp.Add(item, SVNOperation(p, SaltAPI.SVNOperation.update, svnUsername, svnPassword, minionName));
+                                temp.Add(item, SVNOperation(p, SaltAPI.SVNOperation.update, minionName, svnUsername, svnPassword));
                             }
                         }
                     }
@@ -487,7 +487,7 @@ namespace SaltAPI
         /// <param name="st">使用自带模块还是私有模块</param>
         /// <param name="fun">使用私有模块的时候需要提供模块名称</param>
         /// <returns></returns>
-        public static string SVNOperation(string filePath, SVNOperation so, string svnUsername, string svnPassword, List<string> minionName, int? version = null, string source = "", SVNType st = SVNType.salt, string fun = "")
+        public static string SVNOperation(string filePath, SVNOperation so, List<string> minionName, string svnUsername="", string svnPassword="", string remote="",int? version = null, string source = "", SVNType st = SVNType.salt, string fun = "")
         {
             RunCmdType rct = new RunCmdType();
             rct.client = "local";
@@ -506,7 +506,19 @@ namespace SaltAPI
             switch (so)
             {
                 case SaltAPI.SVNOperation.checkout:
-                    break;
+                    switch (st)
+                    {
+                        case SVNType.salt:
+                            rct.fun = "svn.checkout";
+                            rct.arg = new List<string> { "username=" + svnUsername, "password=" + svnPassword, filePath, remote, opts };
+                            return CmdRunString(RunCmdTypeToString(rct));
+                        case SVNType.Order:
+                            rct.fun = fun;
+                            rct.arg = new List<string> { "username=" + svnUsername, "password=" + svnPassword, remote,filePath, "certCheck=False", "revision=" + rversion };
+                            return CmdRunString(RunCmdTypeToString(rct));
+                        default:
+                            return null;
+                    }
                 case SaltAPI.SVNOperation.update:
                     switch (st)
                     {
@@ -528,7 +540,18 @@ namespace SaltAPI
                 case SaltAPI.SVNOperation.export:
                     break;
                 case SaltAPI.SVNOperation.info:
-                    break;
+                    rct.arg = new List<string> {  filePath };
+                    switch (st)
+                    {
+                        case SVNType.salt:
+                            rct.fun = "svn.info";
+                            return CmdRunString(RunCmdTypeToString(rct));
+                        case SVNType.Order:
+                            rct.fun = fun;
+                            return CmdRunString(RunCmdTypeToString(rct));
+                        default:
+                            return null;
+                    }
                 case SaltAPI.SVNOperation.remove:
                     break;
                 case SaltAPI.SVNOperation.status:
@@ -611,7 +634,7 @@ namespace SaltAPI
                     break;
                 case SaltAPI.IISOperation.update:
                     return new Dictionary<string, string> {
-                        { "update",SVNOperation(physicalPath, SaltAPI.SVNOperation.update, svnUsername, svnPassword, minionName, version,st:SVNType.Order) }
+                        { "update",SVNOperation(physicalPath, SaltAPI.SVNOperation.update, minionName,svnUsername, svnPassword, version.ToString(),st:SVNType.Order) }
                     };
                 default:
                     return null;
