@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace SaltAPI
 {
@@ -123,7 +124,7 @@ namespace SaltAPI
         /// <returns></returns>
         public static string RunCmdTypeNoArgToString(RunCmdTypeNoArg rctna)
         {
-            return CmdToString(null,rctna);
+            return CmdToString(null, rctna);
         }
 
         /// <summary>
@@ -132,13 +133,13 @@ namespace SaltAPI
         /// <param name="rct"></param>
         /// <param name="rctna"></param>
         /// <returns></returns>
-        public static string CmdToString(RunCmdType rct=null,RunCmdTypeNoArg rctna=null)
+        public static string CmdToString(RunCmdType rct = null, RunCmdTypeNoArg rctna = null)
         {
-            if (rct!=null)
+            if (rct != null)
             {
                 return JsonConvert.SerializeObject(rct);
             }
-            else if (rctna!=null)
+            else if (rctna != null)
             {
                 return JsonConvert.SerializeObject(rctna);
             }
@@ -307,7 +308,7 @@ namespace SaltAPI
                 {
                     rct = new RunCmdTypeNoArg();
                 }
-                rct.tgt = "os:Windows" ;
+                rct.tgt = "os:Windows";
                 rct.expr_form = "grain";
                 rct.client = "local";
                 rct.fun = "service.get_enabled";
@@ -413,7 +414,7 @@ namespace SaltAPI
         /// <param name="svnPassword">SVN 密码</param>
         /// <param name="svnVersion">SVN 版本</param>
         /// <returns></returns>
-        public static Dictionary<string, dynamic> WindowsServiceOperation(List<string> minionName, ServiceOperation so , string serviceName,string svnUsername="",string svnPassword="",int? svnVersion=null)
+        public static Dictionary<string, dynamic> WindowsServiceOperation(List<string> minionName, ServiceOperation so, string serviceName, string svnUsername = "", string svnPassword = "", int? svnVersion = null)
         {
             RunCmdType rct = new RunCmdType();
             rct.client = "local";
@@ -442,7 +443,7 @@ namespace SaltAPI
                     rct.fun = "service.restart";
                     break;
                 case ServiceOperation.update:
-                    var comm = string.Format("reg query \"HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\{0}\" | find /i  \"ImagePath\"",serviceName);
+                    var comm = string.Format("reg query \"HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\{0}\" | find /i  \"ImagePath\"", serviceName);
                     rct.fun = "cmd.run";
                     rct.arg = new List<string> { comm };
                     var resp = JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(RunCmdTypeToString(rct)));
@@ -450,10 +451,10 @@ namespace SaltAPI
                     foreach (var item in minionName)
                     {
                         var bbb = resp[item].Trim().Replace("    ", ",").Split(',');
-                        if (bbb.Length==3)
+                        if (bbb.Length == 3)
                         {
                             string p = Path.GetDirectoryName(bbb[2].Replace("\"", ""));
-                            if (svnVersion!=null)
+                            if (svnVersion != null)
                             {
                                 temp.Add(item, SVNOperation(p, SaltAPI.SVNOperation.update, svnUsername, svnPassword, minionName, svnVersion));
                             }
@@ -486,7 +487,7 @@ namespace SaltAPI
         /// <param name="st">使用自带模块还是私有模块</param>
         /// <param name="fun">使用私有模块的时候需要提供模块名称</param>
         /// <returns></returns>
-        public static string SVNOperation(string filePath,SVNOperation so,string svnUsername,string svnPassword,List<string> minionName,int? version=null,string source="",SVNType st=SVNType.salt,string fun="")
+        public static string SVNOperation(string filePath, SVNOperation so, string svnUsername, string svnPassword, List<string> minionName, int? version = null, string source = "", SVNType st = SVNType.salt, string fun = "")
         {
             RunCmdType rct = new RunCmdType();
             rct.client = "local";
@@ -495,7 +496,7 @@ namespace SaltAPI
 
             string opts = "--trust-server-cert";
             string rversion = "";
-            if (version!=null)
+            if (version != null)
             {
                 opts = string.Format("-r {0} --trust-server-cert", version);
                 rversion = version.ToString();
@@ -515,7 +516,7 @@ namespace SaltAPI
                             return CmdRunString(RunCmdTypeToString(rct));
                         case SVNType.Order:
                             rct.fun = fun;
-                            rct.arg = new List<string> { "username=" + svnUsername, "password=" + svnPassword, "cwd=" + filePath, "certCheck=False", "revision=" + rversion  };
+                            rct.arg = new List<string> { "username=" + svnUsername, "password=" + svnPassword, "cwd=" + filePath, "certCheck=False", "revision=" + rversion };
                             return CmdRunString(RunCmdTypeToString(rct));
                         default:
                             return null;
@@ -557,10 +558,229 @@ namespace SaltAPI
         /// </summary>
         /// <param name="jid"></param>
         /// <returns></returns>
-        public static Dictionary<string, List<Dictionary<string, dynamic>>> job (string jid)
+        public static Dictionary<string, List<Dictionary<string, dynamic>>> job(string jid)
         {
             var r = HttpUtilities.APIWebHelper(APIUrlSelect(APIType.JOBS, jid), HttpUtilities.HttpRequestMethod.GET);
             return JsonConvert.DeserializeObject<Dictionary<string, List<Dictionary<string, dynamic>>>>(r);
+        }
+
+        /// <summary>
+        /// IIS 操作模块
+        /// </summary>
+        /// <param name="minionName">minion名称</param>
+        /// <param name="io">操作方式</param>
+        /// <param name="Name">站点或程序池名称</param>
+        /// <param name="svnUsername">仅用于"update"模式</param>
+        /// <param name="svnPassword">仅用于"update"模式</param>
+        /// <param name="physicalPath">仅用于"update"模式</param>
+        /// <param name="version">仅用于"update"模式</param>
+        /// <returns></returns>
+        public static Dictionary<string, string> IISOperation(List<string> minionName, IISOperation io, List<string> Name, string svnUsername = "", string svnPassword = "", string physicalPath = "", int? version = null)
+        {
+            RunCmdType rct = new RunCmdType();
+            rct.client = "local";
+            rct.expr_form = "list";
+            rct.tgt = minionName;
+            rct.arg = Name;
+
+            switch (io)
+            {
+                case SaltAPI.IISOperation.StartSite:
+                    rct.fun = "xjoker_win_iis.start_site";
+                    break;
+                case SaltAPI.IISOperation.StopSite:
+                    rct.fun = "xjoker_win_iis.stop_site";
+                    break;
+                case SaltAPI.IISOperation.RestartSite:
+                    rct.fun = "xjoker_win_iis.restart_site";
+                    break;
+                case SaltAPI.IISOperation.RemoveSite:
+                    rct.fun = "xjoker_win_iis.remove_site";
+                    break;
+                case SaltAPI.IISOperation.StartAppPool:
+                    rct.fun = "xjoker_win_iis.start_apppool";
+                    break;
+                case SaltAPI.IISOperation.StopAppPool:
+                    rct.fun = "xjoker_win_iis.stop_apppool";
+                    break;
+                case SaltAPI.IISOperation.RestartAppPool:
+                    rct.fun = "xjoker_win_iis.restart_apppool";
+                    break;
+                case SaltAPI.IISOperation.RemoveAppPool:
+                    rct.fun = "xjoker_win_iis.remove_apppool";
+                    break;
+                case SaltAPI.IISOperation.update:
+                    return new Dictionary<string, string> {
+                        { "update",SVNOperation(physicalPath, SaltAPI.SVNOperation.update, svnUsername, svnPassword, minionName, version,st:SVNType.Order) }
+                    };
+                default:
+                    return null;
+            }
+
+
+            return JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(RunCmdTypeToString(rct)));
+        }
+
+        /// <summary>
+        /// 获取所有站点列表
+        /// </summary>
+        /// <param name="minionName">minion名称，如果为通配查询需要同时修改expr_form属性</param>
+        /// <param name="expr_form"></param>
+        /// <returns></returns>
+        public static Dictionary<string, List<IISSiteType>> GetSiteList(dynamic minionName, string expr_form = "glob")
+        {
+            RunCmdType rct = new RunCmdType();
+            rct.client = "local";
+            rct.expr_form = expr_form;
+            rct.tgt = minionName;
+            rct.fun = "xjoker_win_iis.list_sites_xml";
+            rct.arg = new List<string> { };
+
+            var r = JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(RunCmdTypeToString(rct)));
+            if (r != null)
+            {
+                // 所有机器站点的List
+                Dictionary<string, List<IISSiteType>> siteList = new Dictionary<string, List<IISSiteType>>();
+                foreach (var item in r)
+                {
+                    if (item.Value.StartsWith("<") && item.Value.EndsWith(">"))
+                    {
+                        // 本台机器内所有站点List
+                        List<IISSiteType> site = new List<IISSiteType>();
+                        XmlDocument xml = new XmlDocument();
+                        xml.LoadXml(item.Value);
+                        XmlNodeList root = xml.SelectNodes("appcmd/SITE");
+                        foreach (XmlNode i in root)
+                        {
+
+                            // 逐行处理bindings
+                            List<Dictionary<string, List<string>>> bindDict = new List<Dictionary<string, List<string>>>();
+                            for (int j = 0; j < i.SelectSingleNode("site/bindings").ChildNodes.Count; j++)
+                            {
+                                List<string> bindTemp = new List<string>();
+                                var bindOneRow = i.SelectSingleNode("site/bindings").ChildNodes[j];
+                                var bindInfo = bindOneRow.Attributes["bindingInformation"].Value.Split(':');
+                                bindTemp.Add(bindInfo[0]);// IP 
+                                bindTemp.Add(bindInfo[1]);// port
+                                bindTemp.Add(bindInfo[2]);// domain
+
+                                bindDict.Add(
+                                    new Dictionary<string, List<string>>()
+                                    {
+                                        { bindOneRow.Attributes["protocol"].Value ,bindTemp}
+                                    }
+                                );
+                            }
+
+                            // 逐行处理虚拟目录
+                            List<Dictionary<string, string>> app = new List<Dictionary<string, string>>();
+                            for (int j = 0; j < i.SelectSingleNode("site/application").ChildNodes.Count; j++)
+                            {
+                                if (i.SelectSingleNode("site/application").ChildNodes[j].Name != "virtualDirectoryDefaults")
+                                {
+                                    var applicationOneRow = i.SelectSingleNode("site/application").ChildNodes[j];
+                                    var path = applicationOneRow.Attributes["path"].Value;
+                                    var physicalPath = applicationOneRow.Attributes["physicalPath"].Value;
+
+                                    app.Add(
+                                        new Dictionary<string, string>()
+                                        {
+                                            { path,physicalPath }
+                                        }
+                                    );
+                                }
+
+                            }
+                            // 日志存放路径
+                            // 如果没有特别指定则为空
+                            string logFile;
+                            if (i.SelectSingleNode("site/logFile").Attributes["directory"] == null)
+                            {
+                                logFile = null;
+                            }
+                            else
+                            {
+                                logFile = i.SelectSingleNode("site/logFile").Attributes["directory"].Value;
+                            }
+
+                            site.Add(new IISSiteType()
+                            {
+                                id = Convert.ToInt32(i.SelectSingleNode("site").Attributes["id"].Value),
+                                siteName = i.SelectSingleNode("site").Attributes["name"].Value,
+                                logFile = logFile,
+                                physicalPath = i.SelectSingleNode("site/application/virtualDirectory").Attributes["physicalPath"].Value,
+                                bindings = bindDict,
+                                application = app
+                            });
+
+                        }
+                        siteList.Add(item.Key, site);
+                    }
+                }
+                return siteList;
+            }
+
+            return null;
+        }
+
+
+        /// <summary>
+        /// 获取所有AppPool列表
+        /// </summary>
+        /// <param name="minionName">minion名称，如果为通配查询需要同时修改expr_form属性</param>
+        /// <param name="expr_form"></param>
+        /// <returns></returns>
+        public static Dictionary<string, List<AppPoolType>> GetAppPoolList(dynamic minionName, string expr_form = "glob")
+        {
+            RunCmdType rct = new RunCmdType();
+            rct.client = "local";
+            rct.expr_form = expr_form;
+            rct.tgt = minionName;
+            rct.fun = "xjoker_win_iis.list_apppools_xml";
+            rct.arg = new List<string> { };
+
+            var r = JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(RunCmdTypeToString(rct)));
+
+            if (r != null)
+            {
+                Dictionary<string, List<AppPoolType>> siteList = new Dictionary<string, List<AppPoolType>>();
+                foreach (var item in r)
+                {
+                    if (item.Value.StartsWith("<") && item.Value.EndsWith(">"))
+                    {
+                        List<AppPoolType> site = new List<AppPoolType>();
+                        XmlDocument xml = new XmlDocument();
+                        xml.LoadXml(item.Value);
+                        XmlNodeList root = xml.SelectNodes("appcmd/APPPOOL");
+                        foreach (XmlNode i in root)
+                        {
+                            string autoStart;
+                            if (i.SelectSingleNode("add").Attributes["autoStart"] == null)
+                            {
+                                autoStart = null;
+                            }
+                            else
+                            {
+                                autoStart = i.SelectSingleNode("add").Attributes["autoStart"].Value;
+                            }
+
+                            site.Add(
+                                new AppPoolType()
+                                {
+                                    name = i.Attributes["APPPOOL.NAME"].Value,
+                                    pipelineMode = i.Attributes["PipelineMode"].Value,
+                                    autoStart = autoStart,
+                                    runtimeVersion = i.Attributes["RuntimeVersion"].Value,
+                                    state = i.Attributes["state"].Value
+                                }
+                            );
+                        }
+                        siteList.Add(item.Key,site);
+                    }
+                }
+                return siteList;
+            }
+            return null;
         }
 
 

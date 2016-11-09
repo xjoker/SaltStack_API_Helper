@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaltStack_API_Helper", "SaltStack_API_Helper\SaltStack_API_Helper.csproj", "{5DFE7B0D-3564-4385-9C6B-AE7E3243C9BE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API_Test", "API_Test\API_Test.csproj", "{84453E9B-8A1D-4AF6-AFE5-A2898871407D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{5DFE7B0D-3564-4385-9C6B-AE7E3243C9BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5DFE7B0D-3564-4385-9C6B-AE7E3243C9BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5DFE7B0D-3564-4385-9C6B-AE7E3243C9BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84453E9B-8A1D-4AF6-AFE5-A2898871407D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84453E9B-8A1D-4AF6-AFE5-A2898871407D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84453E9B-8A1D-4AF6-AFE5-A2898871407D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84453E9B-8A1D-4AF6-AFE5-A2898871407D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

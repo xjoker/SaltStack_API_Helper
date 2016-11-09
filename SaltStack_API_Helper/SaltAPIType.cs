@@ -47,6 +47,22 @@ namespace SaltAPI
 
 
     /// <summary>
+    /// IIS 操作类型
+    /// </summary>
+    public enum IISOperation
+    {
+        StartSite,
+        StopSite,
+        RestartSite,
+        RemoveSite,
+        StartAppPool,
+        StopAppPool,
+        RestartAppPool,
+        RemoveAppPool,
+        update
+    }
+
+    /// <summary>
     /// 基本回显
     /// </summary>
     public class BaseType
@@ -113,6 +129,48 @@ namespace SaltAPI
 
     }
 
+    /// <summary>
+    /// IIS 的站点详细类型
+    /// </summary>
+    public class IISSiteType
+    {
+        /// <summary>
+        /// 站点ID
+        /// </summary>
+        public int id { get; set; }
+        /// <summary>
+        /// 站点名称
+        /// </summary>
+        public string siteName { get; set; }
+        /// <summary>
+        /// 站点日志路径
+        /// </summary>
+        public string logFile { get; set; }
+        /// <summary>
+        /// 站点物理路径
+        /// </summary>
+        public string physicalPath { get; set; }
 
+        /// <summary>
+        /// 站点绑定信息
+        /// </summary>
+        public List<Dictionary<string, List<string>>> bindings { get; set; }
+        /// <summary>
+        /// 站点app信息以及物理路径
+        /// </summary>
+        public List<Dictionary<string, string>> application { get; set; }
 
+    }
+
+    /// <summary>
+    /// IIS 的程序池详细类型
+    /// </summary>
+    public class AppPoolType
+    {
+        public string name { get; set; }
+        public string autoStart { get; set; }
+        public string pipelineMode { get; set; }
+        public string runtimeVersion { get; set; }
+        public string state { get; set; }
+    }
 }
