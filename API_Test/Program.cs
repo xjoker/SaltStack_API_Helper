@@ -21,14 +21,23 @@ namespace API_Test
             };
 
             // 登陆
-            var loginInfo = Salt_API_Function.Login();
-            Console.WriteLine(loginInfo.token);
+            if (Salt_API_Function.Login() != null)
+            {
+                Console.WriteLine("Login Success");
+                Console.WriteLine("Token: "+ RequestType.xAuthToken);
+            }
+            else
+            {
+                Console.WriteLine("Login Failed");
+            }
+
 
             //Salt_API_Function.IISOperation(new List<string> { "192.168.72.68" }, IISOperation.StopSite, new List<string> { "333.com" });
 
             //Salt_API_Function.GetAppPoolList("*");
 
-            var cc = Salt_API_Function.SVNOperation(@"D:\Web\Repo120161012155749", SVNOperation.info, new List<string> { "192.168.72.68" },st:SVNType.Order,fun: "xjoker_svn.info");
+            //var cc = Salt_API_Function.SVNOperation(@"D:\Web\Repo120161012155749", SVNOperation.info, new List<string> { "192.168.72.68" }, st: SVNType.Order, fun: "xjoker_svn.info");
+            var cc =Salt_API_Function.WindowsServicesStatusGetByPowershell();
             Console.WriteLine();
 
         }

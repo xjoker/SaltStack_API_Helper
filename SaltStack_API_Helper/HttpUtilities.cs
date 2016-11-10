@@ -73,7 +73,8 @@ namespace SaltAPI
 
                     case HttpStatusCode.Unauthorized: // 401
                         return "401";
-
+                    case HttpStatusCode.NotAcceptable: // 406
+                        return "406";
                     default:
                         return "000";
                 }

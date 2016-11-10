@@ -191,7 +191,11 @@ namespace SaltAPI
         {
             if (string.IsNullOrEmpty(json)) return null;
             var resp = HttpUtilities.APIWebHelper(APIurl, HttpUtilities.HttpRequestMethod.POST, json);
+            if (resp.Length==3)
+            {
 
+                return new BaseType() { @return=new List<object> { "ERROR",resp } };
+            }
             return JsonConvert.DeserializeObject<BaseType>(resp);
         }
 
@@ -403,6 +407,61 @@ namespace SaltAPI
             }
         }
 
+        /// <summary>
+        /// 自定义方法获取Windows 服务准确的当前状态
+        /// 通过 Powershell 的 get-service 方法
+        /// </summary>
+        /// <param name="rct"></param>
+        /// <returns></returns>
+        public static Dictionary<string, Dictionary<string, List<string>>> WindowsServicesStatusGetByPowershell(RunCmdType rct = null)
+        {
+            try
+            {
+                var list = new Dictionary<string, Dictionary<string, List<string>>>();
+
+                if (rct==null)
+                {
+                    rct = new RunCmdType();
+                    rct.client = "local";
+                    rct.tgt = "os:Windows";
+                    rct.expr_form = "grain";
+                    rct.fun = "xjoker_win_service.get_service_status";
+                    rct.arg =new List<string> { };
+                }
+                
+                var r=JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(RunCmdTypeToString(rct)));
+                foreach (var minion in r.Keys)
+                {
+                    if (!r[minion].Contains("is not available."))
+                    {
+                        var service = r[minion].Trim().Replace("\r\n\r\n", ",").Split(',');
+                        var serviceListTemp = new Dictionary<string, List<string>>();
+                        foreach (var i in service)
+                        {
+                            /*
+                                0 = 服务名称
+                                1 = 服务状态
+                                2 = 服务显示名称
+                            */
+                            var z =i.Replace("\r\n", ",").Split(',');
+                            serviceListTemp.Add(
+                                z[0].Replace("Name","").Replace(":","").Trim(), 
+                                new List<string>() {
+                                    z[1].Replace("Status","").Replace(":","").Trim(),
+                                    z[2].Replace("DisplayName","").Replace(":","").Trim()
+                                });
+                        }
+                        list.Add(minion, serviceListTemp);
+                    }
+                    
+                }
+                return list;
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         /// <summary>
         /// Windows 服务操作方法
