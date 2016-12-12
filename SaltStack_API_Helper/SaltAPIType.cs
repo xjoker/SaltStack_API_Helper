@@ -142,6 +142,12 @@ namespace SaltAPI
         /// 站点名称
         /// </summary>
         public string siteName { get; set; }
+
+        /// <summary>
+        /// 站点当前状态
+        /// </summary>
+        public bool siteState { get; set; }
+
         /// <summary>
         /// 站点日志路径
         /// </summary>

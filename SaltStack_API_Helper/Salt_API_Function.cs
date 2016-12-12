@@ -20,7 +20,7 @@ namespace SaltAPI
         /// <summary>
         /// 登陆API的账户信息
         /// </summary>
-        public static LoginRequestType LoginRequestInfo = null;
+        public static LoginRequestType loginRequestInfo = null;
 
 
         /// <summary>
@@ -149,15 +149,16 @@ namespace SaltAPI
 
         /// <summary>
         /// API登陆方法
+        /// Token有过期时间，需要偶尔调用一次
         /// </summary>
         /// <param name="lrt">登陆信息</param>
         /// <param name="url">API登陆的Url</param>
         /// <returns></returns>
         public static LoginResponseType Login()
         {
-            if (LoginRequestInfo != null)
+            if (loginRequestInfo != null)
             {
-                var json = JsonConvert.SerializeObject(LoginRequestInfo);
+                var json = JsonConvert.SerializeObject(loginRequestInfo);
                 var resp = JsonConvert.DeserializeObject<BaseType>(HttpUtilities.APIWebHelper(APIUrlSelect(APIType.LOGIN), HttpUtilities.HttpRequestMethod.POST, json));
                 var loginInfo = JsonConvert.DeserializeObject<LoginResponseType>(resp.@return[0].ToString());
                 RequestType.xAuthToken = loginInfo.token;
@@ -191,10 +192,10 @@ namespace SaltAPI
         {
             if (string.IsNullOrEmpty(json)) return null;
             var resp = HttpUtilities.APIWebHelper(APIurl, HttpUtilities.HttpRequestMethod.POST, json);
-            if (resp.Length==3)
+            if (resp.Length == 3)
             {
 
-                return new BaseType() { @return=new List<object> { "ERROR",resp } };
+                return new BaseType() { @return = new List<object> { "ERROR", resp } };
             }
             return JsonConvert.DeserializeObject<BaseType>(resp);
         }
@@ -419,17 +420,17 @@ namespace SaltAPI
             {
                 var list = new Dictionary<string, Dictionary<string, List<string>>>();
 
-                if (rct==null)
+                if (rct == null)
                 {
                     rct = new RunCmdType();
                     rct.client = "local";
                     rct.tgt = "os:Windows";
                     rct.expr_form = "grain";
                     rct.fun = "xjoker_win_service.get_service_status";
-                    rct.arg =new List<string> { };
+                    rct.arg = new List<string> { };
                 }
-                
-                var r=JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(RunCmdTypeToString(rct)));
+
+                var r = JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(RunCmdTypeToString(rct)));
                 foreach (var minion in r.Keys)
                 {
                     if (!r[minion].Contains("is not available."))
@@ -443,9 +444,9 @@ namespace SaltAPI
                                 1 = 服务状态
                                 2 = 服务显示名称
                             */
-                            var z =i.Replace("\r\n", ",").Split(',');
+                            var z = i.Replace("\r\n", ",").Split(',');
                             serviceListTemp.Add(
-                                z[0].Replace("Name","").Replace(":","").Trim(), 
+                                z[0].Replace("Name", "").Replace(":", "").Trim(),
                                 new List<string>() {
                                     z[1].Replace("Status","").Replace(":","").Trim(),
                                     z[2].Replace("DisplayName","").Replace(":","").Trim()
@@ -453,7 +454,7 @@ namespace SaltAPI
                         }
                         list.Add(minion, serviceListTemp);
                     }
-                    
+
                 }
                 return list;
             }
@@ -515,7 +516,7 @@ namespace SaltAPI
                             string p = Path.GetDirectoryName(bbb[2].Replace("\"", ""));
                             if (svnVersion != null)
                             {
-                                temp.Add(item, SVNOperation(p, SaltAPI.SVNOperation.update,  minionName, svnUsername, svnPassword, svnVersion.ToString()));
+                                temp.Add(item, SVNOperation(p, SaltAPI.SVNOperation.update, minionName, svnUsername, svnPassword, svnVersion.ToString()));
                             }
                             else
                             {
@@ -546,7 +547,7 @@ namespace SaltAPI
         /// <param name="st">使用自带模块还是私有模块</param>
         /// <param name="fun">使用私有模块的时候需要提供模块名称</param>
         /// <returns></returns>
-        public static string SVNOperation(string filePath, SVNOperation so, List<string> minionName, string svnUsername="", string svnPassword="", string remote="",int? version = null, string source = "", SVNType st = SVNType.salt, string fun = "")
+        public static string SVNOperation(string filePath, SVNOperation so, List<string> minionName, string svnUsername = "", string svnPassword = "", string remote = "", int? version = null, string source = "", SVNType st = SVNType.salt, string fun = "")
         {
             RunCmdType rct = new RunCmdType();
             rct.client = "local";
@@ -573,7 +574,7 @@ namespace SaltAPI
                             return CmdRunString(RunCmdTypeToString(rct));
                         case SVNType.Order:
                             rct.fun = fun;
-                            rct.arg = new List<string> { "username=" + svnUsername, "password=" + svnPassword, remote,filePath, "certCheck=False", "revision=" + rversion };
+                            rct.arg = new List<string> { "username=" + svnUsername, "password=" + svnPassword, remote, filePath, "certCheck=False", "revision=" + rversion };
                             return CmdRunString(RunCmdTypeToString(rct));
                         default:
                             return null;
@@ -599,7 +600,7 @@ namespace SaltAPI
                 case SaltAPI.SVNOperation.export:
                     break;
                 case SaltAPI.SVNOperation.info:
-                    rct.arg = new List<string> {  filePath };
+                    rct.arg = new List<string> { filePath };
                     switch (st)
                     {
                         case SVNType.salt:
@@ -693,7 +694,7 @@ namespace SaltAPI
                     break;
                 case SaltAPI.IISOperation.update:
                     return new Dictionary<string, string> {
-                        { "update",SVNOperation(physicalPath, SaltAPI.SVNOperation.update, minionName,svnUsername, svnPassword, version.ToString(),st:SVNType.Order) }
+                        { "update",SVNOperation(physicalPath, SaltAPI.SVNOperation.update, minionName,svnUsername, svnPassword, version:version,st:SVNType.Order,fun:"xjoker_svn.update") }
                     };
                 default:
                     return null;
@@ -754,6 +755,9 @@ namespace SaltAPI
                                 );
                             }
 
+
+
+
                             // 逐行处理虚拟目录
                             List<Dictionary<string, string>> app = new List<Dictionary<string, string>>();
                             for (int j = 0; j < i.SelectSingleNode("site/application").ChildNodes.Count; j++)
@@ -785,6 +789,15 @@ namespace SaltAPI
                                 logFile = i.SelectSingleNode("site/logFile").Attributes["directory"].Value;
                             }
 
+
+                            // 站点状态判断
+                            var siteState = i.Attributes["state"].Value;
+                            bool state = false;
+                            if (siteState == "Started")
+                            {
+                                state = true;
+                            }
+
                             site.Add(new IISSiteType()
                             {
                                 id = Convert.ToInt32(i.SelectSingleNode("site").Attributes["id"].Value),
@@ -792,7 +805,8 @@ namespace SaltAPI
                                 logFile = logFile,
                                 physicalPath = i.SelectSingleNode("site/application/virtualDirectory").Attributes["physicalPath"].Value,
                                 bindings = bindDict,
-                                application = app
+                                application = app,
+                                siteState = state
                             });
 
                         }
@@ -857,7 +871,7 @@ namespace SaltAPI
                                 }
                             );
                         }
-                        siteList.Add(item.Key,site);
+                        siteList.Add(item.Key, site);
                     }
                 }
                 return siteList;

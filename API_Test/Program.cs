@@ -13,7 +13,7 @@ namespace API_Test
         {
             //初始化
             Salt_API_Function.APIurl = "https://192.168.72.60:1559/";
-            Salt_API_Function.LoginRequestInfo = new LoginRequestType()
+            Salt_API_Function.loginRequestInfo = new LoginRequestType()
             {
                 username = "salt",
                 password = "salt@pass",
@@ -32,12 +32,12 @@ namespace API_Test
             }
 
 
-            //Salt_API_Function.IISOperation(new List<string> { "192.168.72.68" }, IISOperation.StopSite, new List<string> { "333.com" });
+            var bnbbb = Salt_API_Function.GetSiteList("192.168.72.68");
 
-            //Salt_API_Function.GetAppPoolList("*");
+            ////Salt_API_Function.GetAppPoolList("*");
 
-            //var cc = Salt_API_Function.SVNOperation(@"D:\Web\Repo120161012155749", SVNOperation.info, new List<string> { "192.168.72.68" }, st: SVNType.Order, fun: "xjoker_svn.info");
-            var cc =Salt_API_Function.WindowsServicesStatusGetByPowershell();
+            ////var cc = Salt_API_Function.SVNOperation(@"D:\Web\Repo120161012155749", SVNOperation.info, new List<string> { "192.168.72.68" }, st: SVNType.Order, fun: "xjoker_svn.info");
+            //var cc =Salt_API_Function.WindowsServicesStatusGetByPowershell();
             Console.WriteLine();
 
         }
