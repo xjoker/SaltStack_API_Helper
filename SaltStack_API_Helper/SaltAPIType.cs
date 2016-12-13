@@ -63,6 +63,15 @@ namespace SaltAPI
     }
 
     /// <summary>
+    /// IIS 绑定操作类型
+    /// </summary>
+    public enum IISBindOperation
+    {
+        Create,
+        Delete
+    }
+
+    /// <summary>
     /// 基本回显
     /// </summary>
     public class BaseType

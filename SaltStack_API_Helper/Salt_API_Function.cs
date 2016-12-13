@@ -880,5 +880,44 @@ namespace SaltAPI
         }
 
 
+
+        /// <summary>
+        ///  编辑 IIS 站点绑定
+        /// </summary>
+        /// <param name="minionName">机器名称</param>
+        /// <param name="domain">域名</param>
+        /// <param name="ip">IP</param>
+        /// <param name="port">端口</param>
+        /// <returns></returns>
+        public static bool SiteBindEdit(string minionName, IISBindOperation ibo, string siteName,string domain,string ip,string port)
+        {
+            if (!string.IsNullOrWhiteSpace(siteName) && !string.IsNullOrWhiteSpace(domain)&& !string.IsNullOrWhiteSpace(ip) && !string.IsNullOrWhiteSpace(port))
+            {
+                string fun = "xjoker_win_iis.create_binding";
+                if (ibo==IISBindOperation.Delete)
+                {
+                    fun = "xjoker_win_iis.remove_binding";
+                }
+
+                RunCmdType rct = new RunCmdType();
+                rct.client = "local";
+                rct.expr_form = "glob";
+                rct.tgt = minionName;
+                rct.fun = fun;
+                rct.arg = new List<string> { siteName, domain,ip,port };
+
+                var r = JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(RunCmdTypeToString(rct)));
+                if (r!=null && r.Keys.Contains(minionName))
+                {
+                    if (Convert.ToBoolean(r[minionName]))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
     }
 }
