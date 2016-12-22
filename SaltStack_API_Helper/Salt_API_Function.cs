@@ -743,9 +743,18 @@ namespace SaltAPI
                                 List<string> bindTemp = new List<string>();
                                 var bindOneRow = i.SelectSingleNode("site/bindings").ChildNodes[j];
                                 var bindInfo = bindOneRow.Attributes["bindingInformation"].Value.Split(':');
-                                bindTemp.Add(bindInfo[0]);// IP 
-                                bindTemp.Add(bindInfo[1]);// port
-                                bindTemp.Add(bindInfo[2]);// domain
+                                if (bindInfo.Length==2)
+                                {
+                                    bindTemp.Add(bindInfo[1]);// IP 
+                                    bindTemp.Add(bindInfo[0]);// port
+                                    bindTemp.Add("");// domain
+                                }
+                                else if (bindInfo.Length==3){
+                                    bindTemp.Add(bindInfo[0]);// IP 
+                                    bindTemp.Add(bindInfo[1]);// port
+                                    bindTemp.Add(bindInfo[2]);// domain
+                                }
+                                
 
                                 bindDict.Add(
                                     new Dictionary<string, List<string>>()

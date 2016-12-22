@@ -32,7 +32,9 @@ namespace API_Test
             }
 
 
-            var bnbbb = Salt_API_Function.SiteBindEdit("192.168.72.68", IISBindOperation.Create, "333.com", "adadgdfsvdfasdf.com", "*", "233");
+            ///var bnbbb = Salt_API_Function.IISOperation(new List<string> { "192.168.72.68", "192.168.72.69" }, IISOperation.StopSite, new List<string> { "333.com" });
+
+            var ccc = Salt_API_Function.GetSiteList("192.168.72.69");
 
             ////Salt_API_Function.GetAppPoolList("*");
 
