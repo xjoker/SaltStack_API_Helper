@@ -982,7 +982,7 @@ namespace SaltAPI
                 Dictionary<string, bool> r = new Dictionary<string, bool>();
                 foreach (var item in minions)
                 {
-                    r.Add(item, false);
+                    r.Add(item, true);
                 }
 
                 RunCmdType rct = new RunCmdType();
@@ -1113,9 +1113,13 @@ namespace SaltAPI
                         {
                             // 如果SVN返回的结果含有error 则判断为更新失败
                             // 不太准确
-                            if (d[i].Contains("ERROR"))
+                            if (d[i]!=null)
                             {
-                                r[i] = false;
+                                if (d[i].Contains("ERROR"))
+                                {
+                                    r[i] = false;
+                                }
+                               
                             }
                         }
                     }
@@ -1138,9 +1142,13 @@ namespace SaltAPI
                         {
                             // 如果SVN返回的结果含有error 则判断为更新失败
                             // 不太准确
-                            if (e[i].Contains("ERROR"))
+                            if (e[i] != null)
                             {
-                                r[i] = false;
+                                if (e[i].Contains("ERROR"))
+                                {
+                                    r[i] = false;
+                                }
+
                             }
                         }
                     }
@@ -1171,9 +1179,13 @@ namespace SaltAPI
                         {
                             // 如果SVN返回的结果含有error 则判断为更新失败
                             // 不太准确
-                            if (f[i].Contains("ERROR"))
+                            if (f[i] != null)
                             {
-                                r[i] = false;
+                                if (f[i].Contains("ERROR"))
+                                {
+                                    r[i] = false;
+                                }
+
                             }
                         }
                     }
