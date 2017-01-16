@@ -955,9 +955,9 @@ namespace SaltAPI
         /// <returns></returns>
         public static Dictionary<string, bool> CreateIISSite(
             List<string> minions,
-            string apppoolName="",
+            string apppoolName = "",
             string apppoolVersion = "",
-            bool apppoolEnable32bit=false,
+            bool apppoolEnable32bit = false,
             string apppoolModel = "",
             string siteName = "",
             string siteProtocol = "",
@@ -1029,7 +1029,7 @@ namespace SaltAPI
                 }
 
                 // 创建程序池
-                
+
                 rct.fun = "xjoker_win_iis.create_apppool";
                 rct.client = "local";
                 rct.expr_form = expr_from;
@@ -1098,14 +1098,14 @@ namespace SaltAPI
 
 
                 //设定站点Runas
-                if (!string.IsNullOrWhiteSpace(siteRunasUsername)&&!string.IsNullOrWhiteSpace(siteRunasPassword))
+                if (!string.IsNullOrWhiteSpace(siteRunasUsername) && !string.IsNullOrWhiteSpace(siteRunasPassword))
                 {
                     rct = new RunCmdType();
                     rct.fun = "xjoker_win_iis.site_run_as";
                     rct.client = "local";
                     rct.expr_form = expr_from;
                     rct.tgt = minions;
-                    rct.arg = new List<string> { siteName,siteRunasUsername,siteRunasPassword};
+                    rct.arg = new List<string> { siteName, siteRunasUsername, siteRunasPassword };
                     var d = JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(RunCmdTypeToString(rct)));
                     foreach (var i in minions)
                     {
@@ -1113,13 +1113,13 @@ namespace SaltAPI
                         {
                             // 如果SVN返回的结果含有error 则判断为更新失败
                             // 不太准确
-                            if (d[i]!=null)
+                            if (d[i] != null)
                             {
                                 if (d[i].Contains("ERROR"))
                                 {
                                     r[i] = false;
                                 }
-                               
+
                             }
                         }
                     }
@@ -1197,6 +1197,100 @@ namespace SaltAPI
             {
                 return null;
             }
+        }
+
+        /// <summary>
+        /// 创建GoodSync任务
+        /// </summary>
+        /// <returns></returns>
+        public static Dictionary<string, string> GoodSyncNewJob(
+            List<string> minion,
+            string RunAsUsername,
+            string jobname,
+            string f1,
+            string f2,
+            int ReadOnlySource = 0,
+            int Direction = 1,
+            int CleanupOldGenerations = 0,
+            int CopyCreateTime = 0,
+            int WaitForLocks = 0,
+            int WaitForLocksMinutes = 10,
+            string exclude = "",
+            string include = "",
+            int LimitChangesPercent = 100,
+            int OnFileChangeAction = 2,
+            int OnTimerAction = 2,
+            int TimerIntervalMinutes = 10,
+            int AutoResolveConflicts = 1,
+            int DetectMovesAndRenames = 0,
+            int UberUnlockedUpload = 0,
+            int Option = 0
+            )
+        {
+            string minionList = "";
+            foreach (var item in minion)
+            {
+                minionList = string.Join(",", "\"" + item + "\"");
+            }
+
+            string poJson = "{\"fun\":\"xjoker_goodsync.jobnew\",\"expr_form\":\"list\",\"client\":\"local\"," +
+                    $"\"tgt\":[{minionList}]," +
+                    $"\"arg\":[\"{ RunAsUsername }\",\"{ jobname }\",\"{ f1.Replace("\\", "\\\\") }\",\"{ f2.Replace("\\", "\\\\") }\",{ ReadOnlySource },{ Direction },{ CleanupOldGenerations },{ CopyCreateTime },{ WaitForLocks },{ WaitForLocksMinutes },\"{ exclude }\",\"{ include }\",{ LimitChangesPercent },{ OnFileChangeAction },{ OnTimerAction },{ TimerIntervalMinutes }, { AutoResolveConflicts },{ DetectMovesAndRenames },{ UberUnlockedUpload },{ Option }]}}";
+
+            var r = JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(poJson));
+            return r;
+        }
+
+        
+        /// <summary>
+        /// 同步Goodsync任务
+        /// </summary>
+        /// <param name="RunAsUsername"></param>
+        /// <param name="minion"></param>
+        /// <param name="jobName"></param>
+        /// <returns></returns>
+        public static Dictionary<string, string> GoodSyncSyncJob(string RunAsUsername, List<string> minion, string jobName = "")
+        {
+            RunCmdType rct = new RunCmdType();
+            rct.client = "local";
+            rct.expr_form = "list";
+            rct.tgt = minion;
+            if (string.IsNullOrWhiteSpace(jobName))
+            {
+                rct.fun = "xjoker_goodsync.jobanalyzeall";
+                rct.arg = new List<string>() { RunAsUsername };
+                CmdRunString(RunCmdTypeToString(rct));
+                rct.fun = "xjoker_goodsync.jobsyncall";
+                rct.arg = new List<string>() { RunAsUsername };
+                return JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(RunCmdTypeToString(rct)));
+            }
+            else
+            {
+                rct.fun = "xjoker_goodsync.jobanalyze";
+                rct.arg = new List<string>() { RunAsUsername, jobName };
+                CmdRunString(RunCmdTypeToString(rct));
+                rct.fun = "xjoker_goodsync.jobsync";
+                rct.arg = new List<string>() { RunAsUsername, jobName };
+                return JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(RunCmdTypeToString(rct)));
+            }
+        }
+
+        /// <summary>
+        /// 删除指定GoodSync 的 Job
+        /// </summary>
+        /// <param name="RunAsUsername"></param>
+        /// <param name="minion"></param>
+        /// <param name="jobName"></param>
+        /// <returns></returns>
+        public static Dictionary<string, string> GoodSyncDeleteJob(string RunAsUsername, List<string> minion, string jobName)
+        {
+            RunCmdType rct = new RunCmdType();
+            rct.client = "local";
+            rct.expr_form = "list";
+            rct.tgt = minion;
+            rct.fun = "xjoker_goodsync.jobdelete";
+            rct.arg = new List<string>() { RunAsUsername, jobName };
+            return JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(RunCmdTypeToString(rct)));
         }
     }
 }

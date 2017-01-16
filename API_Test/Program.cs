@@ -15,7 +15,7 @@ namespace API_Test
             var a = "{\"Data\":\"执行完成!\"}";
             Console.WriteLine(a.Length.ToString());
             //初始化
-            Salt_API_Function.APIurl = "https://192.168.72.60:1559/";
+            Salt_API_Function.APIurl = "https://192.168.79.101:1559/";
             Salt_API_Function.loginRequestInfo = new LoginRequestType()
             {
                 username = "salt",
@@ -34,8 +34,11 @@ namespace API_Test
                 Console.WriteLine("Login Failed");
             }
 
+            //var r = Salt_API_Function.GoodSyncNewJob(new List<string>() { "192.168.79.111" }, "Administrator", "fdfd111fd111", @"D:\A", @"D:\B");
+            //var c = Salt_API_Function.GoodSyncSyncJob("Administrator", new List<string>() { "192.168.79.111" }, "fdfd111fd111");
+            var c = Salt_API_Function.GoodSyncDeleteJob("Administrator", new List<string>() { "192.168.79.111" }, "fdfd111fd111");
             //var bb = Salt_API_Function.SVNOperation("D:\\Web", SVNOperation.checkout,new List<string> { "192.168.72.68","192.168.72.69"},"salt","saltsalt", "https://salt-minion-2008-2:8443/svn/salt/");
-            var ccc = Salt_API_Function.CreateIISSite(new List<string> { "192.168.72.68", "192.168.72.69" }, siteName: "salt", svnUrl: "https://salt-minion-2008-2:8443/svn/salt/", svnUsername: "salt", svnPassword: "saltsalt",sitePath: "D:\\web\\salt",apppoolVersion:"v4.0",apppoolModel:"1",apppoolEnable32bit:false, siteProtocol:"http");
+            // var ccc = Salt_API_Function.CreateIISSite(new List<string> { "192.168.72.68", "192.168.72.69" }, siteName: "salt", svnUrl: "https://salt-minion-2008-2:8443/svn/salt/", svnUsername: "salt", svnPassword: "saltsalt",sitePath: "D:\\web\\salt",apppoolVersion:"v4.0",apppoolModel:"1",apppoolEnable32bit:false, siteProtocol:"http");
             /////var bnbbb = Salt_API_Function.IISOperation(new List<string> { "192.168.72.68", "192.168.72.69" }, IISOperation.StopSite, new List<string> { "333.com" });
 
             //var ccc = Salt_API_Function.GetSiteList("192.168.72.69");
