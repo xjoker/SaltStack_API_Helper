@@ -574,7 +574,7 @@ namespace SaltAPI
                             return CmdRunString(RunCmdTypeToString(rct));
                         case SVNType.Order:
                             rct.fun = fun;
-                            rct.arg = new List<string> { "username=" + svnUsername, "password=" + svnPassword, remote, filePath, "certCheck=False", "revision=" + rversion };
+                            rct.arg = new List<string> { "username=" + svnUsername, "password=" + svnPassword, "remote="+remote, "cwd="+filePath, "certCheck=False", "revision=" + rversion };
                             return CmdRunString(RunCmdTypeToString(rct));
                         default:
                             return null;
@@ -971,6 +971,7 @@ namespace SaltAPI
             string svnUrl = "",
             string svnUsername = "",
             string svnPassword = "",
+            string siteSourceGoodsyncRunAsUser = "",
             string siteSourceGoodsync = "",
             string siteSourceGoodsyncExclude = "",
             string siteSourceGoodsyncInclude = "")
@@ -1157,38 +1158,13 @@ namespace SaltAPI
                 // 设定goodsync
                 if (!string.IsNullOrWhiteSpace(siteSourceGoodsync))
                 {
-                    rct = new RunCmdType();
-                    rct.fun = "xjoker_goodsync.jobnew";
-                    rct.client = "local";
-                    rct.expr_form = expr_from;
-                    rct.tgt = minions;
-                    rct.arg = new List<string> { "jobname="+siteName,
-                                            "f1="+siteSourceGoodsync,
-                                            "f2="+sitePath,
-                                            "ReadOnlySource=0",
-                                            "exclude="+siteSourceGoodsyncExclude,
-                                            "include="+siteSourceGoodsyncInclude,
-                                            "OnFileChangeAction=1",
-                                            "OnTimerAction=1",
-                                            "DetectMovesAndRenames=0",
-                                            "Option=1" };
-                    var f = JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(RunCmdTypeToString(rct)));
-                    foreach (var i in minions)
-                    {
-                        if (f.Keys.Contains(i))
-                        {
-                            // 如果SVN返回的结果含有error 则判断为更新失败
-                            // 不太准确
-                            if (f[i] != null)
-                            {
-                                if (f[i].Contains("ERROR"))
-                                {
-                                    r[i] = false;
-                                }
-
-                            }
-                        }
-                    }
+                    var f=GoodSyncNewJob(minions,
+                                            siteSourceGoodsyncRunAsUser,
+                                            siteName,
+                                            siteSourceGoodsync,
+                                            sitePath,
+                                            exclude: siteSourceGoodsyncExclude,
+                                            include: siteSourceGoodsyncInclude);
                 }
                 return r;
 
@@ -1235,7 +1211,11 @@ namespace SaltAPI
 
             string poJson = "{\"fun\":\"xjoker_goodsync.jobnew\",\"expr_form\":\"list\",\"client\":\"local\"," +
                     $"\"tgt\":[{minionList}]," +
-                    $"\"arg\":[\"{ RunAsUsername }\",\"{ jobname }\",\"{ f1.Replace("\\", "\\\\") }\",\"{ f2.Replace("\\", "\\\\") }\",{ ReadOnlySource },{ Direction },{ CleanupOldGenerations },{ CopyCreateTime },{ WaitForLocks },{ WaitForLocksMinutes },\"{ exclude }\",\"{ include }\",{ LimitChangesPercent },{ OnFileChangeAction },{ OnTimerAction },{ TimerIntervalMinutes }, { AutoResolveConflicts },{ DetectMovesAndRenames },{ UberUnlockedUpload },{ Option }]}}";
+                    $"\"arg\":[\"{ RunAsUsername }\",\"{ jobname }\",\"{ f1.Replace("\\", "\\\\") }\",\"{ f2.Replace("\\", "\\\\") }\",{ ReadOnlySource },{ Direction },{ CleanupOldGenerations },{ CopyCreateTime },{ WaitForLocks },{ WaitForLocksMinutes },\"{ exclude }\",\"{ include }\",{ LimitChangesPercent },{ OnFileChangeAction },{ OnTimerAction },{ TimerIntervalMinutes },{ AutoResolveConflicts },{ DetectMovesAndRenames },{ UberUnlockedUpload },{ Option }]}}";
+
+            JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(poJson));
+
+            poJson= $"{{\"fun\":\"xjoker_goodsync.jobsyncall\",\"expr_form\":\"list\",\"client\":\"local\",\"tgt\":[{minionList}],\"arg\":[\"{ RunAsUsername }\"]}}";
 
             var r = JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(poJson));
             return r;
