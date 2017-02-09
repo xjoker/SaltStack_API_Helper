@@ -188,4 +188,43 @@ namespace SaltAPI
         public string runtimeVersion { get; set; }
         public string state { get; set; }
     }
+
+    public class WindowsAllUserInfo
+    {
+        public string gid { get; set; }
+        public List<string> groups { get; set; }
+        public string home { get; set; }
+        public string name { get; set; }
+        public string passwd { get; set; }
+        public string shell { get; set; }
+        public string uid { get; set; }
+    }
+
+
+    public class WindowsUserInfo
+    {
+        public bool account_disabled { get; set; }
+        public bool account_locked { get; set; }
+        public bool active { get; set; }
+        public string comment { get; set; }
+        public string description { get; set; }
+        public bool disallow_change_password { get; set; }
+        public DateTime? expiration_date { get; set; }
+        public bool expired { get; set; }
+        public int failed_logon_attempts { get; set; }
+        public string fullname { get; set; }
+        public string gid { get; set; }
+        public List<string> groups { get; set; }
+        public string home { get; set; }
+        public string homedrive { get; set; }
+        public string last_logon { get; set; }
+        public string logonscript { get; set; }
+        public string name { get; set; }
+        public string passwd { get; set; }
+        public DateTime? password_changed { get; set; }
+        public bool password_never_expires { get; set; }
+        public string profile { get; set; }
+        public int successful_logon_attempts { get; set; }
+        public string uid { get; set; }
+    }
 }
