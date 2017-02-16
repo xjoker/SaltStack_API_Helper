@@ -979,7 +979,6 @@ namespace SaltAPI
             string svnUrl = "",
             string svnUsername = "",
             string svnPassword = "",
-            string siteSourceGoodsyncRunAsUser = "",
             string siteSourceGoodsync = "",
             string siteSourceGoodsyncExclude = "",
             string siteSourceGoodsyncInclude = "")
@@ -1167,7 +1166,6 @@ namespace SaltAPI
                 if (!string.IsNullOrWhiteSpace(siteSourceGoodsync))
                 {
                     var f=GoodSyncNewJob(minions,
-                                            siteSourceGoodsyncRunAsUser,
                                             siteName,
                                             siteSourceGoodsync,
                                             sitePath,
@@ -1189,7 +1187,6 @@ namespace SaltAPI
         /// <returns></returns>
         public static Dictionary<string, string> GoodSyncNewJob(
             List<string> minion,
-            string RunAsUsername,
             string jobname,
             string f1,
             string f2,
@@ -1219,11 +1216,11 @@ namespace SaltAPI
 
             string poJson = "{\"fun\":\"xjoker_goodsync.jobnew\",\"expr_form\":\"list\",\"client\":\"local\"," +
                     $"\"tgt\":[{minionList}]," +
-                    $"\"arg\":[\"{ RunAsUsername }\",\"{ jobname }\",\"{ f1.Replace("\\", "\\\\") }\",\"{ f2.Replace("\\", "\\\\") }\",{ ReadOnlySource },{ Direction },{ CleanupOldGenerations },{ CopyCreateTime },{ WaitForLocks },{ WaitForLocksMinutes },\"{ exclude }\",\"{ include }\",{ LimitChangesPercent },{ OnFileChangeAction },{ OnTimerAction },{ TimerIntervalMinutes },{ AutoResolveConflicts },{ DetectMovesAndRenames },{ UberUnlockedUpload },{ Option }]}}";
+                    $"\"arg\":[\"{ jobname }\",\"{ f1.Replace("\\", "\\\\") }\",\"{ f2.Replace("\\", "\\\\") }\",{ ReadOnlySource },{ Direction },{ CleanupOldGenerations },{ CopyCreateTime },{ WaitForLocks },{ WaitForLocksMinutes },\"{ exclude }\",\"{ include }\",{ LimitChangesPercent },{ OnFileChangeAction },{ OnTimerAction },{ TimerIntervalMinutes },{ AutoResolveConflicts },{ DetectMovesAndRenames },{ UberUnlockedUpload },{ Option }]}}";
 
             JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(poJson));
 
-            poJson= $"{{\"fun\":\"xjoker_goodsync.jobsyncall\",\"expr_form\":\"list\",\"client\":\"local\",\"tgt\":[{minionList}],\"arg\":[\"{ RunAsUsername }\"]}}";
+            poJson= $"{{\"fun\":\"xjoker_goodsync.jobsyncall\",\"expr_form\":\"list\",\"client\":\"local\",\"tgt\":[{minionList}],\"arg\":[]}}";
 
             var r = JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(poJson));
             return r;
