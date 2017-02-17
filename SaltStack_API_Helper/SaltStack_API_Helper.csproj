@@ -47,14 +47,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DynamicJson.cs" />
+    <Compile Include="GoodSync\GoodSync.cs" />
     <Compile Include="HttpUtilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SaltAPIType.cs" />
     <Compile Include="Salt_API_Function.cs" />
+    <Compile Include="Windows\IIS\iis.cs" />
+    <Compile Include="Windows\Service\Service.cs" />
+    <Compile Include="Windows\SVN\svn.cs" />
+    <Compile Include="Windows\User\User.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
