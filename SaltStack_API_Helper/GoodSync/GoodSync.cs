@@ -58,7 +58,7 @@ namespace SaltAPI
         /// <param name="minion"></param>
         /// <param name="jobName"></param>
         /// <returns></returns>
-        public static Dictionary<string, string> GoodSyncSyncJob(string RunAsUsername, List<string> minion, string jobName = "")
+        public static Dictionary<string, string> GoodSyncSyncJob(List<string> minion, string jobName = "")
         {
             RunCmdType rct = new RunCmdType();
             rct.client = "local";
@@ -67,19 +67,19 @@ namespace SaltAPI
             if (string.IsNullOrWhiteSpace(jobName))
             {
                 rct.fun = "xjoker_goodsync.jobanalyzeall";
-                rct.arg = new List<string>() { RunAsUsername };
+                rct.arg = new List<string>() {  };
                 CmdRunString(RunCmdTypeToString(rct));
                 rct.fun = "xjoker_goodsync.jobsyncall";
-                rct.arg = new List<string>() { RunAsUsername };
+                rct.arg = new List<string>() {  };
                 return JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(RunCmdTypeToString(rct)));
             }
             else
             {
                 rct.fun = "xjoker_goodsync.jobanalyze";
-                rct.arg = new List<string>() { RunAsUsername, jobName };
+                rct.arg = new List<string>() {  jobName };
                 CmdRunString(RunCmdTypeToString(rct));
                 rct.fun = "xjoker_goodsync.jobsync";
-                rct.arg = new List<string>() { RunAsUsername, jobName };
+                rct.arg = new List<string>() {  jobName };
                 return JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(RunCmdTypeToString(rct)));
             }
         }
@@ -91,14 +91,14 @@ namespace SaltAPI
         /// <param name="minion"></param>
         /// <param name="jobName"></param>
         /// <returns></returns>
-        public static Dictionary<string, string> GoodSyncDeleteJob(string RunAsUsername, List<string> minion, string jobName)
+        public static Dictionary<string, string> GoodSyncDeleteJob(List<string> minion, string jobName)
         {
             RunCmdType rct = new RunCmdType();
             rct.client = "local";
             rct.expr_form = "list";
             rct.tgt = minion;
             rct.fun = "xjoker_goodsync.jobdelete";
-            rct.arg = new List<string>() { RunAsUsername, jobName };
+            rct.arg = new List<string>() { jobName };
             return JsonConvert.DeserializeObject<Dictionary<string, string>>(CmdRunString(RunCmdTypeToString(rct)));
         }
     }

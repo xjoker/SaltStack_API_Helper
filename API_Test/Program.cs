@@ -38,7 +38,7 @@ namespace API_Test
 
 
             //var r = Salt_API_Function.Win_UserInfo(new List<string>() { "web" },"name");
-            var cc = Salt_API_Function.GetSiteList("web" );
+            var cc = Salt_API_Function.Win_FileMove(new List<string> { "web" }, "D:\\web\\www.gsyn.com", "c:\\backup\\www.gsyn.com\\SiteFile");
             //var c = Salt_API_Function.GoodSyncSyncJob("Administrator", new List<string>() { "192.168.79.111" }, "fdfd111fd111");
             //var c = Salt_API_Function.GoodSyncDeleteJob("Administrator", new List<string>() { "192.168.79.111" }, "fdfd111fd111");
             //var bb = Salt_API_Function.SVNOperation("D:\\Web", SVNOperation.checkout,new List<string> { "192.168.72.68","192.168.72.69"},"salt","saltsalt", "https://salt-minion-2008-2:8443/svn/salt/");

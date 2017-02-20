@@ -53,6 +53,7 @@
     <Compile Include="SaltAPIType.cs" />
     <Compile Include="Salt_API_Function.cs" />
     <Compile Include="Windows\IIS\iis.cs" />
+    <Compile Include="Windows\Order\File.cs" />
     <Compile Include="Windows\Service\Service.cs" />
     <Compile Include="Windows\SVN\svn.cs" />
     <Compile Include="Windows\User\User.cs" />

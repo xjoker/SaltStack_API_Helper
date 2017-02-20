@@ -535,5 +535,65 @@ namespace SaltAPI
                 return null;
             }
         }
+
+
+        /// <summary>
+        /// 导出IIS 程序池配置
+        /// </summary>
+        /// <param name="minions"></param>
+        /// <param name="apppoolName">程序池名称</param>
+        /// <param name="outputPath">导出路径</param>
+        /// <returns></returns>
+        public static Dictionary<string,bool> ExportIISAppPoolConfig(string minions,string apppoolName,string outputPath)
+        {
+            if (string.IsNullOrWhiteSpace(apppoolName))
+            {
+                throw new ArgumentNullException("AppPoolName is null!");
+            }
+
+            if (string.IsNullOrWhiteSpace(outputPath))
+            {
+                throw new ArgumentNullException("OutputPath is null!");
+            }
+
+            RunCmdType rct = new RunCmdType();
+            rct.fun = "xjoker_win_iis.export_iis_apppool_config";
+            rct.client= "local";
+            rct.tgt = minions;
+            rct.expr_form = "glob";
+            rct.arg = new List<string> { apppoolName, outputPath };
+            var b = CmdRunString(RunCmdTypeToString(rct));
+            return JsonConvert.DeserializeObject<Dictionary<string, bool>>(b);
+        }
+
+
+        /// <summary>
+        /// 导出IIS 站点配置
+        /// </summary>
+        /// <param name="minions"></param>
+        /// <param name="siteName">站点名称</param>
+        /// <param name="outputPath">导出路径</param>
+        /// <returns></returns>
+        public static Dictionary<string, bool> ExportIISSiteConfig(string minions, string siteName, string outputPath)
+        {
+            if (string.IsNullOrWhiteSpace(siteName))
+            {
+                throw new ArgumentNullException("SiteName is null!");
+            }
+
+            if (string.IsNullOrWhiteSpace(outputPath))
+            {
+                throw new ArgumentNullException("OutputPath is null!");
+            }
+
+            RunCmdType rct = new RunCmdType();
+            rct.fun = "xjoker_win_iis.export_iis_site_config";
+            rct.client = "local";
+            rct.tgt = minions;
+            rct.expr_form = "glob";
+            rct.arg = new List<string> { siteName, outputPath };
+            var b = CmdRunString(RunCmdTypeToString(rct));
+            return JsonConvert.DeserializeObject<Dictionary<string, bool>>(b);
+        }
     }
 }
